@@ -1,5 +1,9 @@
-# Stage 1: Build the .NET Web API using .NET 10 SDK
-FROM ://microsoft.com AS build
+# Define the official Microsoft registry variables safely at the top
+ARG SDK_IMAGE=://microsoft.com
+ARG RUNTIME_IMAGE=://microsoft.com
+
+# Stage 1: Build the .NET Web API
+FROM ${SDK_IMAGE} AS build
 WORKDIR /src
 
 # Copy project files and restore dependencies
@@ -11,7 +15,7 @@ COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 # Stage 2: Create Final Runtime Image with BOTH .NET 10 and Python 3
-FROM ://microsoft.com AS final
+FROM ${RUNTIME_IMAGE} AS final
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
