@@ -1,5 +1,5 @@
-﻿# Stage 1: Build the .NET Web API
-FROM docker.io/microsoft/dotnet-sdk:8.0 AS build
+# Stage 1: Build the .NET Web API using .NET 10 SDK
+FROM ://microsoft.com AS build
 WORKDIR /src
 
 # Copy project files and restore dependencies
@@ -10,8 +10,8 @@ RUN dotnet restore
 COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
-# Stage 2: Create Final Runtime Image with BOTH .NET 8 and Python 3
-FROM docker.io/microsoft/dotnet-aspnet:8.0 AS final
+# Stage 2: Create Final Runtime Image with BOTH .NET 10 and Python 3
+FROM ://microsoft.com AS final
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
@@ -31,5 +31,5 @@ COPY --from=build /app/publish .
 # Create the folder where your Python engine outputs charts
 RUN mkdir -p wwwroot/charts
 
-# Start the Web API
+# Start the Web API using your exact namespace dll name
 ENTRYPOINT ["dotnet", "health_information.dll"]
