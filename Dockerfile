@@ -1,9 +1,5 @@
-# Define the official Microsoft registry variables safely at the top
-ARG SDK_IMAGE=://microsoft.com
-ARG RUNTIME_IMAGE=://microsoft.com
-
-# Stage 1: Build the .NET Web API
-FROM ${SDK_IMAGE} AS build
+# Stage 1: Build the .NET Web API using the Docker Hub alias
+FROM amd64/dotnet-sdk:10.0 AS build
 WORKDIR /src
 
 # Copy project files and restore dependencies
@@ -15,7 +11,7 @@ COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 # Stage 2: Create Final Runtime Image with BOTH .NET 10 and Python 3
-FROM ${RUNTIME_IMAGE} AS final
+FROM amd64/dotnet-aspnet:10.0 AS final
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
