@@ -129,11 +129,11 @@ namespace health_information.Controller
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int Id)
         {
             try
             {
-                var result = await _userService.DeleteUser(id);
+                var result = await _userService.DeleteUser(Id);
                 if (result)
                 {
                     return Ok(new { message = "User deleted successfully" });
