@@ -9,10 +9,13 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 // Add services to the container.
 //builder.Services.AddDbContext<HealthDbContext>(options =>
 
-  //  options.UseSqlServer(builder.Configuration.GetConnectionString("HealthDb")));
+//  options.UseSqlServer(builder.Configuration.GetConnectionString("HealthDb")));
 
 builder.Services.AddDbContext<HealthDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("HealthDb"), npgsqlOptions => npgsqlOptions.CommandTimeout(180))
