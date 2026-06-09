@@ -1,5 +1,5 @@
-# Stage 1: Build the .NET Web API using the Docker Hub alias
-FROM amd64/dotnet-sdk:10.0 AS build
+# Stage 1: Build the .NET Web API using Ubuntu's official Microsoft mirror
+FROM ubuntu.azurecr.io/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy project files and restore dependencies
@@ -11,7 +11,7 @@ COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 # Stage 2: Create Final Runtime Image with BOTH .NET 10 and Python 3
-FROM amd64/dotnet-aspnet:10.0 AS final
+FROM ubuntu.azurecr.io/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
