@@ -104,7 +104,7 @@ namespace health_information.Controller
             //we configure the operating sys background process to trigger python
             var startInfo = new ProcessStartInfo
             {
-                FileName = "python",
+                FileName = "python3",
                 Arguments = $"Scripts/generate_charts.py \"{studyId}\"",
                 UseShellExecute = false,
                 RedirectStandardInput = true,
