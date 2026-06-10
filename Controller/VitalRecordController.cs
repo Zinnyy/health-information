@@ -99,13 +99,15 @@ namespace health_information.Controller
 
             //we convert the list of vitals into a json text string
             string jsonPayload = JsonSerializer.Serialize(records) ;
+            string scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "generate_charts.py");
 
 
             //we configure the operating sys background process to trigger python
             var startInfo = new ProcessStartInfo
             {
                 FileName = "python3",
-                Arguments = $"Scripts/generate_charts.py \"{studyId}\"",
+                //Arguments = $"Scripts/generate_charts.py \"{studyId}\"",
+                Arguments = $"\"{scriptPath}\" \"{studyId}\"",
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,

@@ -24,6 +24,9 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
     <PackageReference Include="Supabase.Postgrest" Version="4.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+	  <Content Include="Scripts\**\*">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
   </ItemGroup>
 
   <ItemGroup>
