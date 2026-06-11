@@ -57,7 +57,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactCors", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Replace with your React app's URL
+        policy.WithOrigins("http://localhost:5173", "https://clinicalhealthproject.netlify.app") // Replace with your React app's URL
               .AllowAnyHeader()
               .AllowAnyMethod()
                .AllowCredentials();
