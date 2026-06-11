@@ -101,6 +101,11 @@ namespace health_information.Controller
             string jsonPayload = JsonSerializer.Serialize(records) ;
             string scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "generate_charts.py");
 
+            string physicalChartFolder = Path.Combine(AppContext.BaseDirectory, "wwwroot", "charts");
+            if (!Directory.Exists(physicalChartFolder))
+            {
+                Directory.CreateDirectory(physicalChartFolder);
+            }
 
             //we configure the operating sys background process to trigger python
             var startInfo = new ProcessStartInfo
@@ -145,6 +150,21 @@ namespace health_information.Controller
                         return BadRequest(new { message = "Data pipeline breakdown inside script parsing.", details = terminalErrors });
 
                     }
+
+                    string physicalChartPath = Path.Combine(physicalChartFolder, $"chart_{studyId}.png");
+                    int retries = 0;
+                    while (!System.IO.File.Exists(physicalChartPath) && retries < 15)
+                    {
+                        await Task.Delay(200); // Check every 200ms
+                        retries++;
+                    }
+
+                    // Final safety catch in case python failed to save due to an internal charting bug
+                    if (!System.IO.File.Exists(physicalChartPath))
+                    {
+                        return StatusCode(500, new { message = "Chart file generation timed out or failed to write to disk storage layer." });
+                    }
+
 
                     //If successful, hand back a web link pointing to the generated image inside wwwroot
                     string browserFriendlyChartUrl = $"/charts/chart_{studyId}.png";
