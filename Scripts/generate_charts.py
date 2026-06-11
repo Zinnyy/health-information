@@ -70,9 +70,9 @@ def main():
         
         # Find the word 'Scripts' and split the path there to find the main source folder
         # This completely bypasses the hidden 'bin/Debug' folders!
-       # base_source_dir = script_dir.split(os.sep + "Scripts")[0]
+        # base_source_dir = script_dir.split(os.sep + "Scripts")[0]
 
-       base_app_dir = os.path.dirname(script_dir)  # Move up one level from Scripts to the main project folder
+        base_app_dir = os.path.dirname(script_dir)  # Move up one level from Scripts to the main project folder
         
         # Point directly to the source directory's wwwroot/charts folder
         #output_dir = r"C:\Users\PC\source\repos\health information\wwwroot\charts"
@@ -84,7 +84,8 @@ def main():
         
         # Generate the absolute file saving path
         output_filename = os.path.join(output_dir, f"chart_{patient_study_id}.png")
-       @if os.path.exists(output_filename):
+       
+        if os.path.exists(output_filename):
             os.remove(output_filename)  
         
         plt.savefig(output_filename, dpi=150)
