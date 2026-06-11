@@ -129,6 +129,7 @@ namespace health_information.Controller
                         if (writer.BaseStream.CanWrite)
                         {
                             await writer.WriteAsync(jsonPayload);
+                            await writer.FlushAsync();
                         }
                     }
 
