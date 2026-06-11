@@ -123,9 +123,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowReactCors");
 app.UseRouting();
-app.UseStaticFiles();
 
 /*app.UseStaticFiles(new StaticFileOptions
 {
