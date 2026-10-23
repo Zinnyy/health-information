@@ -185,7 +185,15 @@ namespace health_information.Controller
             {
                 return NotFound(new { message = "No Clinical tracking data found for this patient to analyze" });
             }
-            string jsonPayload = JsonSerializer.Serialize(records);
+
+            var serializePayload = records.Select(r => new
+            {
+                r.HeartRate,
+                r.SystolicBp,
+                r.Glucose
+            });
+
+            string jsonPayload = JsonSerializer.Serialize(serializePayload);
             string scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "analyze_biometric.py");
             var startInfo = new ProcessStartInfo
             {
@@ -214,9 +222,16 @@ namespace health_information.Controller
                     string consoleOutput = await process.StandardOutput.ReadToEndAsync();
                     string terminalErrors = await process.StandardError.ReadToEndAsync();
                     await process.WaitForExitAsync();
-                    if (!string.IsNullOrEmpty(terminalErrors))
+                    //if (!string.IsNullOrEmpty(terminalErrors))
+                    if(process.ExitCode != 0)
                     {
-                        return BadRequest(new { message = "Data pipeline(Machine learning) breakdown inside script parsing.", details = terminalErrors });
+                        return BadRequest(new { message = "Data pipeline(Machine learning) breakdown inside script parsing.",
+                            details = terminalErrors });
+                    }
+                    if (string.IsNullOrWhiteSpace(consoleOutput))
+                    {
+                        return StatusCode(500, new { message = "Python script executed but returned zero data results.", 
+                            details = terminalErrors });
                     }
                     var aiInsights = JsonSerializer.Deserialize<Dictionary<string, object>>(consoleOutput);
 
