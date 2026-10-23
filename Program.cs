@@ -81,13 +81,15 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         {
-            // ✅ Use the new Reference class instead of the old Reference property
+            // Use the new Reference class instead of the old Reference property
             new OpenApiSecuritySchemeReference("Bearer", document),
             new List<string>()
         }
     });
 });
-/*builder.Services.AddSwaggerGen(options =>
+/*
+builder.Services.AddSwaggerGen(options =>
+
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -101,12 +103,14 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         {
-            // ✅ Use the new Reference class instead of the old Reference property
+            // Use the new Reference class instead of the old Reference property
             new OpenApiSecuritySchemeReference("Bearer", document),
             new List<string>()
         }
     });
-});*/
+}
+
+);*/
 
 var app = builder.Build();
 

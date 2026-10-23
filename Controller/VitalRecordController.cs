@@ -155,7 +155,7 @@ namespace health_information.Controller
                     int retries = 0;
                     while (!System.IO.File.Exists(physicalChartPath) && retries < 15)
                     {
-                        await Task.Delay(200); // Check every 200ms
+                        await Task.Delay(200); 
                         retries++;
                     }
 
@@ -174,6 +174,63 @@ namespace health_information.Controller
             catch (Exception ex)
             {
                 return StatusCode(500,new { message = "Process infrastructure initialization error.", error = ex.Message });
+            }
+        }
+
+        [HttpGet("analyze-vitals/{patientid}")]
+        public async Task<IActionResult> GetPatientAiRiskAnalysis(int patientid)
+        {
+            var records = await _vitalService.GetRecordsByPatientIdAsync(patientid);
+            if (records == null || !records.Any())
+            {
+                return NotFound(new { message = "No Clinical tracking data found for this patient to analyze" });
+            }
+            string jsonPayload = JsonSerializer.Serialize(records);
+            string scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "analyze_biometric.py");
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "python3",
+                Arguments = $"\"{scriptPath}\"",
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            };
+            try
+            {
+                using (Process process = Process.Start(startInfo))
+                {
+                    if (process == null)
+                        return StatusCode(500, "Failed to initialize processing engine");
+                    using (StreamWriter writer = process.StandardInput)
+                    {
+                        if (writer.BaseStream.CanWrite)
+                        {
+                            await writer.WriteAsync(jsonPayload);
+                            await writer.FlushAsync();
+                        }
+                    }
+                    string consoleOutput = await process.StandardOutput.ReadToEndAsync();
+                    string terminalErrors = await process.StandardError.ReadToEndAsync();
+                    await process.WaitForExitAsync();
+                    if (!string.IsNullOrEmpty(terminalErrors))
+                    {
+                        return BadRequest(new { message = "Data pipeline(Machine learning) breakdown inside script parsing.", details = terminalErrors });
+                    }
+                    var aiInsights = JsonSerializer.Deserialize<Dictionary<string, object>>(consoleOutput);
+
+                    return Ok(new
+                    {
+                        PatientId = patientid,
+                        EvaluationTime = DateTime.UtcNow,
+                        AiInsights = aiInsights
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Process infrastructure initialization error.", error = ex.Message });
             }
         }
     }

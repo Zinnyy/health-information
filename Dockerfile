@@ -18,10 +18,10 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir --break-system-packages pandas matplotlib
+RUN pip3 install --no-cache-dir --break-system-packages pandas matplotlib scikit-learn joblib
 
 COPY --from=build /app/publish .
 
-RUN mkdir -p wwwroot/charts
+RUN mkdir -p wwwroot/charts Scripts/models
 
 ENTRYPOINT ["dotnet", "healthInformation.dll"]

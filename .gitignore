@@ -187,6 +187,7 @@ publish/
 *.pubxml
 *.publishproj
 
+
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
 # checkin your Azure Web App publish settings, but sensitive information contained
 # in these scripts will be unencrypted
@@ -359,7 +360,10 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
 appsettings.Development.json
+
+!Scripts/models/biometric_rf_model.pkl
