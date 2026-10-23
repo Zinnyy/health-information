@@ -65,7 +65,7 @@ def main():
         # Calculate a rolling stability trend index
         stability_index = 100 - (df['HeartRate'].std() if len(df) > 1 else 0)
         
-        risk_percentage = int(risk_score * 100)
+        risk_percentage = int(round(risk_score * 100))
         status_text = "Anomaly Alert" if anomaly_detected else "Standard Status"
         severity_tier = "Critical" if risk_score >= 0.70 else "Moderate Warning" if risk_score >= 0.35 else "Normal"
 
@@ -82,6 +82,7 @@ def main():
 
             "status": status_text,
             "riskIndex": risk_percentage,
+            "riskProbability": float(round(risk_score, 4)),
             "actionTier": severity_tier,
             "stabilityIndex": round(max(0, min(stability_index, 100)), 2),
             "metricsProcessed": len(df)
