@@ -5,7 +5,84 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+def main():
+    try:
+        # 1. Read the Patient ID passed from C#
+        patient_study_id = sys.argv[1] if len(sys.argv) > 1 else "Unknown"
 
+        # 2. Read the JSON text that C# sends straight into memory
+        raw_input = sys.stdin.read()
+
+        if not raw_input.strip():
+            print("PythonErr: No JSON data received from C#", file=sys.stderr)
+            sys.exit(1)
+
+        # 3. Use Pandas to load that JSON data into a table
+        data = json.loads(raw_input)
+        df = pd.DataFrame(data)
+
+        # Clean the date column for plotting
+        df['DateRecorded'] = pd.to_datetime(df['DateRecorded'])
+        df = df.sort_values(by='DateRecorded')
+
+        df['DateStr'] = df['DateRecorded'].dt.strftime('%Y-%m-%d')
+
+        # 4. Use Matplotlib to draw ONE graph with three side-by-side bars
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        x_indexes = np.arange(len(df))
+        
+        # Reduced width slightly to 0.22 so all 3 bars sit cleanly next to each other
+        bar_width = 0.22 
+
+        # FIXED: All three items now use x_indexes numerical alignment positions
+        ax.bar(x_indexes - bar_width, df['SystolicBp'], width=bar_width, edgecolor='black', linewidth=0.5, color='red', alpha=0.7, label='Systolic BP')
+        ax.bar(x_indexes, df['HeartRate'], width=bar_width, edgecolor='black', linewidth=0.5, color='orangered', alpha=0.7, label='Heart Rate (BPM)')
+        ax.bar(x_indexes + bar_width, df['Glucose'], width=bar_width, edgecolor='black', linewidth=0.5, color='seagreen', alpha=0.85, label='Blood Glucose')
+
+        # Threshold alert line at 140
+        ax.axhline(y=140, color='darkred', linestyle='--', alpha=0.5, label='Alert Threshold (140)')
+
+        # Labels and Styling
+        ax.set_ylabel('Metrics Scale (mmHg / BPM / mg/dL)')
+        ax.set_xlabel('Dates Checked')
+        ax.set_title(f'Clinical Analytics Timeline - ID: {patient_study_id}')
+        
+        # Center the date tags directly under your three-bar blocks
+        ax.set_xticks(x_indexes)
+        ax.set_xticklabels(df['DateStr'], rotation=15)
+        
+        ax.legend(loc='upper left')
+        ax.grid(True, axis='y', alpha=0.2)
+
+        plt.tight_layout()
+
+        # 5. Path management (Matches Dockerfile structure perfectly)
+        script_dir = os.path.dirname(os.path.abspath(__file__)) 
+        base_app_dir = os.path.dirname(script_dir)  # Points straight to /app inside Docker
+        
+        output_dir = os.path.join(base_app_dir, "wwwroot", "charts")
+
+        os.makedirs(output_dir, exist_ok=True)
+        
+        output_filename = os.path.join(output_dir, f"chart_{patient_study_id}.png")
+       
+        if os.path.exists(output_filename):
+            os.remove(output_filename)  
+        
+        plt.savefig(output_filename, dpi=150)
+        plt.close('all')
+
+        print("Chart generated Cleanly")
+
+    except Exception as e:
+        print(f"PYTHON ERROR: {str(e)}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+
+"""
 def main():
     try:
         # 1. Read the Patient ID passed from C#
@@ -115,5 +192,5 @@ if __name__ == "__main__":
 
 #if __name__ == "__main__":
  #   main()
-
+ """
  
