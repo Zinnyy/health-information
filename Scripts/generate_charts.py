@@ -8,91 +8,186 @@ import os
 def main():
     try:
         # 1. Read the Patient ID passed from C#
-        patient_study_id = sys.argv[1] if len(sys.argv) > 1 else "Unknown"
+        patient_study_id = (
+            sys.argv[1] if len(sys.argv) > 1 else "Unknown"
+        )
 
-        # 2. Read the JSON text that C# sends straight into memory
+        # 2. Read the JSON text sent from C#
         raw_input = sys.stdin.read()
 
         if not raw_input.strip():
-            print("PythonErr: No JSON data received from C#", file=sys.stderr)
+            print(
+                "PythonErr: No JSON data received from C#",
+                file=sys.stderr
+            )
             sys.exit(1)
 
-        # 3. Use Pandas to load that JSON data into a table
+        # 3. Load JSON into Pandas
         data = json.loads(raw_input)
         df = pd.DataFrame(data)
 
-        # Clean the date column for plotting
-        df['DateRecorded'] = pd.to_datetime(df['DateRecorded'])
-        df = df.sort_values(by='DateRecorded')
+        # Clean and sort dates
+        df['DateRecorded'] = pd.to_datetime(
+            df['DateRecorded']
+        )
 
-        df['DateStr'] = df['DateRecorded'].dt.strftime('%Y-%m-%d')
+        df = df.sort_values(
+            by='DateRecorded'
+        )
 
-        # 4. Use Matplotlib to draw ONE graph with three side-by-side bars
-        fig, ax = plt.subplots(figsize=(10, 6))
+        df['DateStr'] = df['DateRecorded'].dt.strftime(
+            '%Y-%m-%d'
+        )
+
+        
+        # 4. CREATE ONE CHART FOR ALL THREE HEALTH METRICS
+       
+
+        fig, ax = plt.subplots(
+            figsize=(10, 6)
+        )
 
         x_indexes = np.arange(len(df))
-        
-        # Reduced width to 0.22 so 3 bars fit cleanly together per date block
-        bar_width = 0.22 
+        bar_width = 0.25
 
-        # Shift the 3 metrics side-by-side cleanly across the X-axis center points
-        ax.bar(x_indexes - bar_width, df['SystolicBp'], width=bar_width, edgecolor='black', linewidth=0.5, color='red', alpha=0.7, label='Systolic BP')
-        ax.bar(x_indexes, df['HeartRate'], width=bar_width, edgecolor='black', linewidth=0.5, color='orangered', alpha=0.7, label='Heart Rate (BPM)')
-        ax.bar(x_indexes + bar_width, df['Glucose'], width=bar_width, edgecolor='black', linewidth=0.5, color='seagreen', alpha=0.85, label='Blood Glucose')
+        # Systolic Blood Pressure
+        ax.bar(
+            x_indexes - bar_width,
+            df['SystolicBp'],
+            width=bar_width,
+            edgecolor='black',
+            linewidth=0.5,
+            color='red',
+            alpha=0.7,
+            label='Systolic BP'
+        )
 
-        # Threshold alert reference line
-        ax.axhline(y=140, color='darkred', linestyle='--', alpha=0.5, label='Hypertension / Pre-Diabetes Alert')
+        # Heart Rate
+        ax.bar(
+            x_indexes,
+            df['HeartRate'],
+            width=bar_width,
+            edgecolor='black',
+            linewidth=0.5,
+            color='orangered',
+            alpha=0.7,
+            label='Heart Rate (BPM)'
+        )
 
-        # Labels, layout configuration, and styling
-        ax.set_ylabel('Metrics Scale (mmHg / BPM / mg/dL)')
-        ax.set_xlabel('Dates Checked')
-        ax.set_title(f'Clinical Analytics Timeline - ID: {patient_study_id}')
-        
-        # Center the date tags directly under your three-bar blocks
-        ax.set_xticks(x_indexes)
-        ax.set_xticklabels(df['DateStr'], rotation=15)
-        
-        ax.legend(loc='upper left')
-        ax.grid(True, axis='y', alpha=0.2)
+        # Blood Glucose
+        ax.bar(
+            x_indexes + bar_width,
+            df['Glucose'],
+            width=bar_width,
+            edgecolor='black',
+            linewidth=0.5,
+            color='seagreen',
+            alpha=0.85,
+            label='Blood Glucose'
+        )
+
+        # Hypertension / glucose reference line
+        ax.axhline(
+            y=140,
+            color='darkred',
+            linestyle='--',
+            alpha=0.5,
+            label='140 Alert Threshold'
+        )
+
+        # Chart title
+        ax.set_title(
+            f'Clinical Analytics Timeline - ID: {patient_study_id}'
+        )
+
+        # Axis labels
+        ax.set_ylabel(
+            'Metric Value'
+        )
+
+        ax.set_xlabel(
+            'Dates Checked'
+        )
+
+        # X-axis dates
+        ax.set_xticks(
+            x_indexes
+        )
+
+        ax.set_xticklabels(
+            df['DateStr'],
+            rotation=15
+        )
+
+        # Legend
+        ax.legend(
+            loc='upper left'
+        )
+
+        # Grid
+        ax.grid(
+            True,
+            axis='y',
+            alpha=0.2
+        )
 
         plt.tight_layout()
 
-        # 5. FIXED ENVIRONMENT PATHS (Works perfectly on Windows and Render Linux)
-        script_dir = os.path.dirname(os.path.abspath(__file__)) 
-        
-        # If running on Render, the root directory is explicitly /app
-        if os.path.exists('/app'):
-            base_app_dir = '/app'
-        else:
-            # If on local Windows machine, move one level up from your Scripts folder
-            base_app_dir = os.path.dirname(script_dir)  
-        
-        output_dir = os.path.join(base_app_dir, "wwwroot", "charts")
-
-        # Create output folders dynamically if they don't exist
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Generate target image write path
-        output_filename = os.path.join(output_dir, f"chart_{patient_study_id}.png")
+     
+        # 5. SAVE THE CHART
        
-        if os.path.exists(output_filename):
-            os.remove(output_filename)  
-        
-        plt.savefig(output_filename, dpi=150)
+
+        script_dir = os.path.dirname(
+            os.path.abspath(__file__)
+        )
+
+        # Move from Scripts folder to main project folder
+        base_app_dir = os.path.dirname(
+            script_dir
+        )
+
+        # wwwroot/charts
+        output_dir = os.path.join(
+            base_app_dir,
+            "wwwroot",
+            "charts"
+        )
+
+        os.makedirs(
+            output_dir,
+            exist_ok=True
+        )
+
+        # Chart filename
+        output_filename = os.path.join(
+            output_dir,
+            f"chart_{patient_study_id}.png"
+        )
+
+        # Remove previous chart
+        if os.path.exists(
+            output_filename
+        ):
+            os.remove(
+                output_filename
+            )
+
+        # Save chart
+        plt.savefig(
+            output_filename,
+            dpi=150
+        )
+
         plt.close('all')
 
         print("Chart generated Cleanly")
 
     except Exception as e:
-        print(f"PYTHON ERROR: {str(e)}", file=sys.stderr)
+        print(
+            f"PYTHON ERROR: {str(e)}",
+            file=sys.stderr
+        )
         sys.exit(1)
-
-if __name__ == "__main__":
-    main()
-
-
-
-
 
 """
 def main():
