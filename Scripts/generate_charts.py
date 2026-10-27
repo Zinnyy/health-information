@@ -21,11 +21,30 @@ def main():
         data = json.loads(raw_input)
         df = pd.DataFrame(data)
 
-        # Clean the date column for plotting
-        df['DateRecorded'] = pd.to_datetime(df['DateRecorded'])
-        df = df.sort_values(by='DateRecorded')
+        if df.empty:
+            print("PythonErr: Dataframe is empty", file=sys.stderr)
+            sys.exit(1)
 
-        df['DateStr'] = df['DateRecorded'].dt.strftime('%Y-%m-%d')
+        # FIX: Ensure all columns exist to prevent KeyError exceptions if C# sends partial records
+        if 'SystolicBp' not in df.columns:
+            df['SystolicBp'] = 0
+        if 'HeartRate' not in df.columns:
+            df['HeartRate'] = 0
+        if 'Glucose' not in df.columns:
+            df['Glucose'] = 0
+
+        # Fill any individual null/NaN values with 0 so Matplotlib can safely plot them
+        df['SystolicBp'] = df['SystolicBp'].fillna(0)
+        df['HeartRate'] = df['HeartRate'].fillna(0)
+        df['Glucose'] = df['Glucose'].fillna(0)
+
+        # Clean the date column for plotting
+        if 'DateRecorded' in df.columns:
+            df['DateRecorded'] = pd.to_datetime(df['DateRecorded'])
+            df = df.sort_values(by='DateRecorded')
+            df['DateStr'] = df['DateRecorded'].dt.strftime('%Y-%m-%d')
+        else:
+            df['DateStr'] = "Unknown Date"
 
         # 4. Use Matplotlib to draw ONE graph with three side-by-side bars
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -35,7 +54,7 @@ def main():
         # Reduced width slightly to 0.22 so all 3 bars sit cleanly next to each other
         bar_width = 0.22 
 
-        # FIXED: All three items now use x_indexes numerical alignment positions
+        # All three items use x_indexes numerical alignment positions safely now
         ax.bar(x_indexes - bar_width, df['SystolicBp'], width=bar_width, edgecolor='black', linewidth=0.5, color='red', alpha=0.7, label='Systolic BP')
         ax.bar(x_indexes, df['HeartRate'], width=bar_width, edgecolor='black', linewidth=0.5, color='orangered', alpha=0.7, label='Heart Rate (BPM)')
         ax.bar(x_indexes + bar_width, df['Glucose'], width=bar_width, edgecolor='black', linewidth=0.5, color='seagreen', alpha=0.85, label='Blood Glucose')
