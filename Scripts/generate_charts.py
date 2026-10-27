@@ -7,7 +7,7 @@ import os
 
 def main():
     try:
-        # 1. Read the Patient ID passed from C#
+        # 1. FIXED: Added [1] index to get the actual Patient ID string instead of the whole argument list
         patient_study_id = sys.argv[1] if len(sys.argv) > 1 else "Unknown"
 
         # 2. Read the JSON text that C# sends straight into memory
@@ -38,7 +38,7 @@ def main():
         ax.bar(x_indexes, df['HeartRate'], width=bar_width, edgecolor='black', linewidth=0.5, color='orangered', alpha=0.7, label='Heart Rate (BPM)')
         ax.bar(x_indexes + bar_width, df['Glucose'], width=bar_width, edgecolor='black', linewidth=0.5, color='seagreen', alpha=0.85, label='Blood Glucose')
 
-        # Threshold alert lines (Both are set at 140)
+        # Threshold alert lines
         ax.axhline(y=140, color='darkred', linestyle='--', alpha=0.5, label='Hypertension / Pre-Diabetes Alert')
 
         # Labels and Styling
