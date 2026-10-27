@@ -66,6 +66,10 @@ def main():
         # Threshold alert line at 140
         ax.axhline(y=140, color='darkred', linestyle='--', alpha=0.5, label='Alert Threshold (140)')
 
+        #fixed y axis intervals: steps of 40 up to 200 max
+        ax.set_yticks(np.arange(0, 201, 40))
+        ax.set_ylim(0, 205)
+        
         # Labels and Styling
         ax.set_ylabel('Metrics Scale (mmHg / BPM / mg/dL)')
         ax.set_xlabel('Dates Checked')
