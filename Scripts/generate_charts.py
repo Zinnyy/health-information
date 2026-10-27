@@ -6,8 +6,6 @@ import numpy as np
 import os
 
 
- 
-
 def main():
     try:
         # 1. Read the Patient ID passed from C#
@@ -55,7 +53,10 @@ def main():
         x_indexes = np.arange(len(df))
         
         # Reduced width slightly to 0.22 so all 3 bars sit cleanly next to each other
-        bar_width = 0.22 
+        if len(df) == 1:
+            bar_width = 0.08
+        else:
+            bar_width = 0.22    
 
         # All three items use x_indexes numerical alignment positions safely now
         ax.bar(x_indexes - bar_width, df['SystolicBp'], width=bar_width, edgecolor='black', linewidth=0.5, color='red', alpha=0.7, label='Systolic BP')
@@ -73,6 +74,10 @@ def main():
         # Center the date tags directly under your three-bar blocks
         ax.set_xticks(x_indexes)
         ax.set_xticklabels(df['DateStr'], rotation=15)
+
+
+        if len(df) == 1:
+            ax.set_xlim(-0.5, 0.5)  # Center the single bar in the middle of the plot
         
         ax.legend(loc='upper left')
         ax.grid(True, axis='y', alpha=0.2)
